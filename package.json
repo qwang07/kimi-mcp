@@ -1,0 +1,47 @@
+{
+  "name": "kimi-mcp",
+  "version": "1.0.0",
+  "description": "Kimi AI网络搜索工具，基于Model Context Protocol (MCP)协议",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "kimi-mcp": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test-mcp.js",
+    "test:env": "node test-kimi-env.js",
+    "test:search": "node test-kimi-search.js",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "kimi",
+    "mcp",
+    "ai",
+    "search",
+    "model-context-protocol",
+    "claude",
+    "moonshot",
+    "websearch"
+  ],
+  "author": "qwang07 <github@quan-wang.me>",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.7.0",
+    "dotenv": "^16.4.7",
+    "openai": "^4.87.3",
+    "zod": "^3.24.2",
+    "zod-to-json-schema": "^3.24.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qwang07/kimi-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/qwang07/kimi-mcp/issues"
+  },
+  "homepage": "https://github.com/qwang07/kimi-mcp#readme"
+}

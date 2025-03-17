@@ -1,0 +1,22 @@
+# 测试文件
+test-*.js
+
+# 开发工具配置
+.vscode/
+.idea/
+.editorconfig
+
+# Git相关
+.git/
+.gitignore
+.github/
+
+# 文档和示例
+docs/
+examples/
+
+# 其他不需要发布的文件
+*.log
+*.md
+!README.md
+.DS_Store 
