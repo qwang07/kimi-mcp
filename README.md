@@ -22,7 +22,7 @@ npx kimi-mcp
 
 ```bash
 # 克隆仓库
-git clone https://github.com/您的GitHub用户名/kimi-mcp.git
+git clone https://github.com/qwang07/kimi-mcp.git
 cd kimi-mcp
 
 # 安装依赖
