@@ -40,8 +40,8 @@ const KIMI_CONFIG = {
     baseURL: process.env.KIMI_BASE_URL || 'https://aiproxy.hzh.sealos.run/v1'
   }),
   model: process.env.KIMI_MODEL || "moonshot-v1-32k",
-  temperature: 0.3,
-  maxTokens: 8192,
+  temperature: process.env.KIMI_TEMPERATURE || 0.3,
+  maxTokens: process.env.KIMI_MAX_TOKENS || 32768,
   systemPrompt: process.env.KIMI_SYSTEM_PROMPT || '你是 Kimi，由 Moonshot AI 提供的人工智能助手。请执行网络搜索并返回结果。',
   tools: [{
     type: "builtin_function",

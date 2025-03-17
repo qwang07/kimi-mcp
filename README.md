@@ -42,8 +42,10 @@ kimi-mcp通过环境变量进行配置。您可以通过以下方式设置环境
 
 ```bash
 export KIMI_API_KEY="your-api-key"
-export KIMI_BASE_URL="https://aiproxy.hzh.sealos.run/v1"
+export KIMI_BASE_URL="https://api.moonshot.cn/v1"
 export KIMI_MODEL="moonshot-v1-32k"
+export KIMI_TEMPERATURE="0.3"
+export KIMI_MAX_TOKENS="32768"
 export KIMI_SYSTEM_PROMPT="自定义系统提示词"
 ```
 
@@ -66,7 +68,7 @@ KIMI_API_KEY="your-api-key" npx kimi-mcp
 # 方法2：使用.env文件（推荐）
 # 在当前目录创建.env文件
 echo "KIMI_API_KEY=your-api-key" > .env
-echo "KIMI_BASE_URL=https://aiproxy.hzh.sealos.run/v1" >> .env
+echo "KIMI_BASE_URL=https://api.moonshot.cn/v1" >> .env
 # 然后运行
 npx kimi-mcp
 ```
@@ -77,9 +79,15 @@ npx kimi-mcp
 
 ### 可选的环境变量
 
-- `KIMI_BASE_URL`: Kimi API的基础URL（默认：https://aiproxy.hzh.sealos.run/v1）
+- `KIMI_BASE_URL`: Kimi API的基础URL（默认：https://api.moonshot.cn/v1）
 - `KIMI_MODEL`: 使用的Kimi模型（默认：moonshot-v1-32k）
+- `KIMI_TEMPERATURE`: 模型温度参数（默认：0.3）
+- `KIMI_MAX_TOKENS`: 最大生成令牌数（默认：32768）
 - `KIMI_SYSTEM_PROMPT`: 默认系统提示词（可被请求参数覆盖）
+- `KIMI_MAX_RETRIES`: 请求失败时的最大重试次数（可选）
+- `KIMI_RETRY_DELAY`: 重试之间的延迟时间（毫秒，可选）
+- `KIMI_CONCURRENT_REQUESTS`: 并发请求数量限制（可选）
+- `KIMI_TIMEOUT`: 请求超时时间（毫秒，可选）
 
 ## 使用方法
 
@@ -124,22 +132,40 @@ kimi-mcp实现了MCP协议，可以与任何支持MCP的客户端集成。例如
 </mcp:tool>
 ```
 
-### 与Claude集成
+### 与Claude桌面版集成
 
-kimi-mcp可以与Claude等支持MCP的AI助手集成：
+kimi-mcp可以与Claude桌面版集成，提供网络搜索功能：
 
-1. 在Claude中启用MCP功能
+1. 安装Claude桌面版并启用MCP功能
 
-2. 添加kimi-mcp作为工具，确保设置了必要的环境变量：
-   ```bash
-   # 方法1：在命令中直接设置环境变量
-   KIMI_API_KEY="your-api-key" npx kimi-mcp
-   
-   # 方法2：如果已在系统中设置了环境变量，直接运行
-   npx kimi-mcp
+2. 编辑Claude配置文件（通常位于`~/Library/Application Support/Claude/claude_desktop_config.json`）：
+   ```json
+   {
+     "globalShortcut": "",
+     "mcpServers": {
+       "kimi-search": {
+         "command": "/path/to/kimi-mcp",
+         "env": {
+           "KIMI_API_KEY": "your-api-key",
+           "KIMI_BASE_URL": "https://api.moonshot.cn/v1",
+           "KIMI_MODEL": "moonshot-v1-32k",
+           "KIMI_TEMPERATURE": "0.3",
+           "KIMI_MAX_TOKENS": "32768",
+           "KIMI_MAX_RETRIES": "3",
+           "KIMI_RETRY_DELAY": "2000",
+           "KIMI_CONCURRENT_REQUESTS": "1",
+           "KIMI_TIMEOUT": "60000"
+         },
+         "autoStart": true,
+         "description": "Kimi AI网络搜索工具"
+       }
+     }
+   }
    ```
 
-3. 使用search工具进行网络搜索：
+3. 重启Claude桌面版应用
+
+4. 使用search工具进行网络搜索：
    ```
    <mcp:tool name="search">
    {
@@ -149,11 +175,6 @@ kimi-mcp可以与Claude等支持MCP的AI助手集成：
    }
    </mcp:tool>
    ```
-
-4. 注意事项：
-   - 确保Claude有权限访问您的环境变量
-   - 如果使用Claude网页版，可能需要在系统级别设置环境变量
-   - 如果使用Claude桌面版，可以在启动Claude之前设置环境变量
 
 ## 支持的工具
 
@@ -184,7 +205,59 @@ kimi-mcp可以与Claude等支持MCP的AI助手集成：
 }
 ```
 
-注意：Kimi会根据自己的规则执行搜索，搜索结果的数量和质量由Kimi自动决定。
+## 默认返回格式
+
+如果未指定`responseFormat`，kimi-mcp将使用以下JSON格式返回结果：
+
+```json
+{
+  "type": "search_results",
+  "data": [
+    {
+      "title": "<标题>",
+      "url": "<URL>",
+      "description": "<描述>",
+      "metadata": {
+        "type": "<内容类型>",
+        "source": "<来源>"
+      }
+    }
+  ],
+  "metadata": {
+    "query": "<查询>",
+    "timestamp": "<时间戳>",
+    "resultCount": "<结果数量>",
+    "queryAnalysis": {
+      "language": "<语言>",
+      "topics": ["<主题1>", "<主题2>"]
+    }
+  }
+}
+```
+
+## 错误处理
+
+当搜索请求失败时，kimi-mcp将返回以下格式的错误信息：
+
+```json
+{
+  "type": "search_error",
+  "message": "<错误信息>",
+  "suggestion": "你可以尝试：1. 修改搜索关键词 2. 检查API密钥是否有效 3. 调整角色描述或返回格式",
+  "context": {
+    "query": "<查询内容>",
+    "role": "<角色定义>"
+  }
+}
+```
+
+## 速率限制注意事项
+
+使用Moonshot API时，请注意以下速率限制：
+- 免费账户通常有每分钟请求次数限制（RPM）
+- 如果遇到`429`错误，表示已达到速率限制，需要等待一段时间后再试
+- 可以通过设置`KIMI_MAX_RETRIES`和`KIMI_RETRY_DELAY`来自动处理速率限制错误
+- 对于高频使用场景，建议升级到付费账户或企业版API
 
 ## 许可证
 

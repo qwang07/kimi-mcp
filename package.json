@@ -1,6 +1,6 @@
 {
   "name": "kimi-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Kimi AI网络搜索工具，基于Model Context Protocol (MCP)协议",
   "main": "index.js",
   "type": "module",
